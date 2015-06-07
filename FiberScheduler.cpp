@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "FiberScheduler.h"
 
-
 extern CFiberScheduler* g_pFiberScheduler = 0;
 
 CFiberScheduler::CFiberScheduler()
@@ -10,11 +9,13 @@ CFiberScheduler::CFiberScheduler()
 	, m_staleFiber(NULL)
 {
 	m_bHasJobs = true;
+
 	// Initialise stack size of fiber pool
-	for (int i = 0 ; i < MAX_FIBER_POOL ; ++i)
+	for (int i = 0 ; i < m_maxFiberPool ; ++i)
 	{
 		m_fiberPool[i].Init(i, FIBER_STACK_SIZE);
 	}
+	memset(&m_activeFibers, 0, sizeof(CFiber*) * 4);
 }
 
 CFiberScheduler::~CFiberScheduler()
@@ -43,31 +44,28 @@ CFiber* CFiberScheduler::GetNextFiber(CFiber* terminatingFiber)
 	// Find the first inactive fiber, will loop while waiting to find one
 	// This is bad as the finished fiber is sat and waiting for a new job.
 	// Think about bridgeFibers that literally do nothing but end?
-	while(!boundFiber)
+	for (int i = 0 ; i < m_maxFiberPool ; ++i)
 	{
-		for (int i = 0 ; i < MAX_FIBER_POOL ; ++i)
+		CFiber& fiber = m_fiberPool[i];
+		if (fiber.GetState() == CFiber::eFS_InActive)
 		{
-			CFiber& fiber = m_fiberPool[i];
-			if (fiber.GetState() == CFiber::eFS_InActive)
-			{
-				fiber.SetState(CFiber::eFS_WaitingForJob);
-				boundFiber = &fiber;
-				break;
-			}
+			boundFiber = &fiber;
+			break;
 		}
 	}
 
-	while(boundFiber->GetState() != CFiber::eFS_Bound)
+	if (!boundFiber)
 	{
-		for (int i = 0 ; i < eFP_Num ; ++i)
+		return NULL;
+	}
+
+	for (int i = 0 ; i < eFP_Num ; ++i)
+	{
+		if (!m_jobQueue[i].Empty())
 		{
-			//Lock while we sort out stuff
-			if (!m_jobQueue[i].Empty())
-			{
-				SJobRequest job = m_jobQueue[i].Dequeue();
-				boundFiber->Bind(job);
-				break;
-			}
+			SJobRequest job = m_jobQueue[i].Dequeue();
+			boundFiber->Bind(job);
+			break;
 		}
 	}
 
@@ -85,6 +83,34 @@ CFiber* CFiberScheduler::GetNextFiber(CFiber* terminatingFiber)
 	return boundFiber;
 }
 
+void CFiberScheduler::StartJobs()
+{
+	for (int i = 0 ; i< m_maxRunningFibers ; ++i)
+	{
+		SThreadInfo& info = m_activeFibers[i].first;
+		CFiber* pInitialFiber = GetNextFiber(NULL);
+		pInitialFiber->SetState(CFiber::eFS_Bound);
+		m_activeFibers[i].second = pInitialFiber;
+		info.m_pStartingFiber = pInitialFiber;
+		CCoreThread thread(&info);
+	}
+}
+
+void CFiberScheduler::AllocateJobs()
+{
+	for (int i = 0 ; i < m_maxRunningFibers ; ++i)
+	{
+		CFiber* pFiber = m_activeFibers[i].second;
+		if (pFiber && pFiber->GetState() == CFiber::eFS_WaitingForJob)
+		{
+			//Has finished, set new one.
+			CFiber* newFiber = GetNextFiber(pFiber);
+			pFiber->SetNextFiber(newFiber);
+			m_activeFibers[i].second = newFiber;
+		}
+	}
+}
+
 /*Static*/ void CFiberScheduler::Schedule(SJobRequest& job, EFiberPriority prio, SFiberCounter* pCounter /*= NULL */, void* data /*= NULL */)
 {
 	job.m_pData = data;
@@ -94,9 +120,43 @@ CFiber* CFiberScheduler::GetNextFiber(CFiber* terminatingFiber)
 
 void CFiberScheduler::FiberYield(CFiber* fiber, SFiberCounter* counter)
 {
+	//First, find out which thread we're on.
+	int fiberIndex = -1;
+	DWORD curThreadId = GetCurrentThreadId();
+	for (int i = 0 ; i < m_maxRunningFibers ; ++i)
+	{
+		if (m_activeFibers[i].first.m_threadID == curThreadId)
+		{
+			fiberIndex = i;
+			break;
+		}
+	}
+	
+	if (fiberIndex == -1)
+	{
+		DebugBreak();
+	}
+
 	TAtomicFiberMap::iterator it = m_savedFibers.find(fiber);
 	if (it == m_savedFibers.end())
 	{
 		m_savedFibers.insert(TAtomicFiberPair(fiber, counter));
 	}
+	fiber->SetState(CFiber::eFS_Yielded);
+	CFiber* pNextFiber = GetNextFiber(NULL);
+	m_activeFibers[fiberIndex].second = pNextFiber;
+	SwitchToFiber(pNextFiber->Address());
+
+	curThreadId = GetCurrentThreadId();
+	for (int i = 0 ; i < m_maxRunningFibers ; ++i)
+	{
+		if (m_activeFibers[i].first.m_threadID == curThreadId)
+		{
+			fiberIndex = i;
+			break;
+		}
+	}
+
+	m_activeFibers[fiberIndex].second = pNextFiber;
+	fiber->SetState(CFiber::eFS_Active);
 }

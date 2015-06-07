@@ -7,11 +7,10 @@
 
 #define MAX_THREAD_HEAP_SIZE 0
 
-CCoreThread::CCoreThread()
+CCoreThread::CCoreThread(SThreadInfo* pThreadInfo)
 {
 	DebugLog("Spooling up a thread...");
-	SThreadInfo info;
-	if(HANDLE threadHandle = CreateThread(NULL, 0, Run, &info, 0, info.m_threadID))
+	if(HANDLE threadHandle = CreateThread(NULL, 0, Run, pThreadInfo, 0, &pThreadInfo->m_threadID))
 	{
 
 	}
@@ -31,11 +30,15 @@ CCoreThread::~CCoreThread()
 	SThreadInfo* info = (SThreadInfo*)lpThreadParameter;
 	DebugLog("		ID: %d", info->m_threadID);
 	ConvertThreadToFiber(0);
-	CFiber* next = g_pFiberScheduler->GetNextFiber(NULL);
-	while (true)
+	if (info->m_pStartingFiber)
 	{
-		SwitchToFiber(next->Address());
+		SwitchToFiber(info->m_pStartingFiber->Address());
 	}
+	else
+	{
+		DebugLog("		No starting fiber. Sad panda");
+	}
+
 	return 0;
 }
 

@@ -12,8 +12,8 @@
 
 #include "Fiber.h"
 #include "JobQueue.h"
+#include "CoreThread.h"
 
-#define MAX_FIBER_POOL 32
 #define FIBER_STACK_SIZE 0
 
 enum EFiberPriority
@@ -34,14 +34,21 @@ public:
 	static void Schedule(SJobRequest& job, EFiberPriority prio, SFiberCounter* pCounter = NULL, void* data = NULL);
 	void FiberYield(CFiber* fiber, SFiberCounter* counter);
 
+	void StartJobs();
+	void AllocateJobs();
+
 	bool HasJobs() { return m_bHasJobs; }
 
 private:
+	typedef std::pair<SThreadInfo, CFiber*> TActiveFibers;
 	typedef std::map<CFiber*, SFiberCounter*> TAtomicFiberMap;
 	typedef std::pair<CFiber*, SFiberCounter*> TAtomicFiberPair;
 	typedef std::vector<CFiber*> TOldFibers;
 
-	CFiber m_fiberPool[32];
+	const static UINT16 m_maxFiberPool = 32;
+	const static UINT16 m_maxRunningFibers = 1;
+	TActiveFibers m_activeFibers[m_maxRunningFibers];
+	CFiber m_fiberPool[m_maxFiberPool];
 	TAtomicFiberMap m_savedFibers;
 	TOldFibers m_oldFibers;
 	CJobQueue m_jobQueue[eFP_Num];

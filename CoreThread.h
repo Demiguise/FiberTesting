@@ -7,19 +7,23 @@
 #include <strsafe.h>
 #include "MemoryManager.h"
 
+class CFiber;
+
 struct SThreadInfo
 {
 	SThreadInfo() 
 		: m_threadID(0)
-		, m_hHeap(0) {}
-	LPDWORD m_threadID;
+		, m_hHeap(0)
+		, m_pStartingFiber(NULL) {}
+	DWORD m_threadID;
 	HANDLE m_hHeap;
+	CFiber* m_pStartingFiber;
 };
 
 class CCoreThread
 {
 public:
-	CCoreThread();
+	CCoreThread(SThreadInfo* pThreadInfo);
 	virtual ~CCoreThread();
 	LPDWORD GetID();
 	static DWORD WINAPI Run(LPVOID lpThreadParameter);
@@ -47,6 +51,7 @@ public:
 	static void DeallocateTag(EMemTags tag);
 private:
 	DWORD m_tlsIndex;
+	CFiber* m_pInitialFiber;
 };
 
 #endif //~__CCORETHREAD_H__

@@ -42,7 +42,7 @@ private:
 
 
 // The data here could be anything! This is quite worrying!
-// Need to consider out 
+#define CREATEJOB(name, func) SJobRequest name(func, #func)
 struct SJobRequest
 {
 	SJobRequest()
@@ -51,12 +51,14 @@ struct SJobRequest
 		, m_pCounter(NULL)
 		, m_pFiber(NULL) {}
 
-	SJobRequest(LPFIBER_START_ROUTINE job)
-		: m_pJob(job)
+	SJobRequest(LPFIBER_START_ROUTINE job, std::string jobName)
+		: m_jobName(jobName)
+		, m_pJob(job)
 		, m_pData(NULL)
 		, m_pCounter(NULL)
 		, m_pFiber(NULL) {}
 
+	std::string m_jobName;
 	LPFIBER_START_ROUTINE m_pJob;
 	void* m_pData;
 	SFiberCounter* m_pCounter;
@@ -69,9 +71,9 @@ public:
 	enum EFiberState
 	{
 		eFS_InActive = 0,
+		eFS_Active,
 		eFS_WaitingForJob,
 		eFS_Bound,
-		eFS_Active,
 		eFS_Finished,
 		eFS_Releasing,
 		eFS_Yielded
@@ -89,10 +91,11 @@ public:
 	static void __stdcall Run(LPVOID lpParam);
 
 	//In-Fiber functions
-	void StartJob(std::string funcName = "UNNAMED");
-	static void SetThreadName(LPCSTR name);
+	void ReleasePrevious();
+	static void SetThreadName(LPCSTR name = "UNNAMED");
 	static void YieldForCounter(SFiberCounter* counter);
 	static void* GetDataFromFiber();
+	void SetNextFiber(CFiber* nextFiber);
 	void EndJob();
 	static void Log(std::string, ...);
 
@@ -115,8 +118,10 @@ private:
 	UINT16 m_id;
 	size_t m_stackSize;
 	EFiberState m_state;
+	std::string m_funcName;
 	LPVOID m_pFiber;
 	CFiber* m_pPrevFiber;
+	CFiber* m_pNextFiber;
 	SFiberCounter* m_pCounter;
 	void* m_pData;
 	LPFIBER_START_ROUTINE m_pFuncPointer; //Function pointer to job

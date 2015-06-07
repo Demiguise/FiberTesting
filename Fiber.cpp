@@ -15,6 +15,8 @@ static const char* FiberStateStrings[] =
 
 CFiber::CFiber(size_t stack)
 	: m_pFiber(NULL)
+	, m_pPrevFiber(NULL)
+	, m_pNextFiber(NULL)
 	, m_pCounter(NULL)
 	, m_pData(NULL)
 	, m_stackSize(stack)
@@ -24,6 +26,8 @@ CFiber::CFiber(size_t stack)
 
 CFiber::CFiber()
 	: m_pFiber(NULL)
+	, m_pPrevFiber(NULL)
+	, m_pNextFiber(NULL)
 	, m_pCounter(NULL)
 	, m_pData(NULL)
 	, m_stackSize(0)
@@ -59,8 +63,8 @@ bool CFiber::Bind(SJobRequest& job)
 	m_pData = job.m_pData;
 	m_pCounter = job.m_pCounter;
 	m_pFuncPointer = (LPFIBER_START_ROUTINE)job.m_pJob;
+	m_funcName = job.m_jobName;
 	job.m_pFiber = this;
-	SetState(eFS_Bound);
 	return true;
 }
 
@@ -81,7 +85,6 @@ void CFiber::SetState(EFiberState newState)
 {
 	if (m_state != newState)
 	{
-		Log("%s => %s", FiberStateStrings[m_state], FiberStateStrings[newState]);
 		m_state = newState;
 	}
 }
@@ -89,18 +92,20 @@ void CFiber::SetState(EFiberState newState)
 /*Static*/ void __stdcall CFiber::Run(LPVOID lpVData)
 {
 	CFiber* pFiber = (CFiber*)GetFiberData();
-	pFiber->StartJob();
+	pFiber->SetState(eFS_Active);
+	pFiber->ReleasePrevious();
+
+#if FIBER_ENABLE_DEBUG
+	pFiber->SetThreadName(pFiber->m_funcName.c_str());
+#endif
+
 	pFiber->GetFunction()(lpVData);
 	pFiber->EndJob();
 }
 
-void CFiber::StartJob(std::string funcName)
+void CFiber::ReleasePrevious()
 {
-	SetState(eFS_Active);
-
-#if FIBER_ENABLE_DEBUG
-	SetThreadName(funcName.c_str());
-#endif
+	m_pNextFiber = NULL;
 
 	//Release previous fiber
 	if (m_pPrevFiber)
@@ -113,6 +118,7 @@ void CFiber::StartJob(std::string funcName)
 		else
 		{
 			Log("Last fiber hasn't finished yet?");
+			DebugBreak();
 		}
 	}
 }
@@ -151,14 +157,25 @@ typedef struct tagTHREADNAME_INFO
 	CFiber* pFiber = (CFiber*)GetFiberData();
 	Log("Yielding for function (%s) counter", counter->GetName());
 	g_pFiberScheduler->FiberYield(pFiber, counter);
-	pFiber->SetState(eFS_Yielded);
-	SwitchToFiber(g_pFiberScheduler->GetNextFiber(NULL)->Address());
-	pFiber->SetState(eFS_Active);
+	Log("Finished yielding");
 }
 
 /*Static*/ void* CFiber::GetDataFromFiber()
 {
 	return ((CFiber*)GetFiberData())->GetData();
+}
+
+void CFiber::SetNextFiber(CFiber* nextFiber)
+{
+	SetState(eFS_Bound);
+	if (!m_pNextFiber)
+	{
+		m_pNextFiber = nextFiber;
+	}
+	else
+	{
+		DebugBreak();
+	}
 }
 
 void CFiber::EndJob()
@@ -167,9 +184,21 @@ void CFiber::EndJob()
 	{
 		pCounter->DecrementCounter();
 	}
+
+	if (m_pNextFiber)
+	{
+		DebugBreak();
+	}
+
+	SetState(eFS_WaitingForJob);
+
+	while (!m_pNextFiber)
+	{
+	}
+
 	SetState(eFS_Finished);
-	CFiber* nextFiber = g_pFiberScheduler->GetNextFiber(this);
-	SwitchToFiber(nextFiber->Address());
+
+	SwitchToFiber(m_pNextFiber->Address());
 }
 
 /*Static*/ void CFiber::Log(std::string frmt, ...)
