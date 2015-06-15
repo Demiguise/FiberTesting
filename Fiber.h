@@ -12,56 +12,59 @@
 class CFiber;
 
 typedef std::atomic<int> TCounter;
-class SFiberCounter
+class CFiberCounter
 {
 public:
-	SFiberCounter() 
-		: m_funcName("DEFAULT")
-	{
-		m_counter.store(0);
-	}
-
-	SFiberCounter(int initialCounter, std::string funcName = "Default")
+	CFiberCounter(int initialCount, std::string funcName = "Default")
 		: m_funcName(funcName)
 	{
-		m_counter.store(initialCounter);
+		m_counter.store(initialCount);
 	}
 
-	~SFiberCounter() {}
+	~CFiberCounter() {}
 
 	bool IsComplete() const { return (m_counter.load() == 0); }
 	void DecrementCounter() { m_counter--; }
 	const char* GetName() const { return m_funcName.c_str(); }
 
 private:
-	// Shouldn't copy these due to the fact that we have an atomic counter. 
-	SFiberCounter& operator= (SFiberCounter& rhs);
+	CFiberCounter& operator= (CFiberCounter& rhs); //Forcing no copy operator
 	std::string m_funcName;
 	TCounter m_counter;
 };
 
 
-// The data here could be anything! This is quite worrying!
 #define CREATEJOB(name, func) SJobRequest name(func, #func)
+
 struct SJobRequest
 {
 	SJobRequest()
-		: m_pJob(NULL)
+		: m_pFunc(NULL)
 		, m_pData(NULL)
 		, m_pCounter(NULL)
 		, m_pFiber(NULL) {}
 
 	SJobRequest(LPFIBER_START_ROUTINE job, std::string jobName)
 		: m_jobName(jobName)
-		, m_pJob(job)
+		, m_pFunc(job)
 		, m_pData(NULL)
 		, m_pCounter(NULL)
 		, m_pFiber(NULL) {}
 
+	SJobRequest& operator= (SJobRequest rhs)
+	{
+		m_jobName = rhs.m_jobName;
+		m_pFunc = rhs.m_pFunc;
+		m_pData = rhs.m_pData;
+		m_pCounter = rhs.m_pCounter;
+		m_pFiber = rhs.m_pFiber;
+		return *this;
+	}
+
 	std::string m_jobName;
-	LPFIBER_START_ROUTINE m_pJob;
+	LPFIBER_START_ROUTINE m_pFunc;
 	void* m_pData;
-	SFiberCounter* m_pCounter;
+	CFiberCounter* m_pCounter;
 	CFiber* m_pFiber;
 };
 
@@ -82,7 +85,9 @@ public:
 	CFiber(LPFIBER_START_ROUTINE func, size_t stack = 0);
 	CFiber(size_t stack);
 	CFiber();
-	~CFiber();
+	~CFiber() 
+	{
+	}
 
 	void Init(UINT16 id, size_t stack);
 	bool Bind(SJobRequest& job);
@@ -92,39 +97,31 @@ public:
 
 	//In-Fiber functions
 	void ReleasePrevious();
-	static void SetThreadName(LPCSTR name = "UNNAMED");
-	static void YieldForCounter(SFiberCounter* counter);
-	static void* GetDataFromFiber();
+	static void YieldForCounter(CFiberCounter* counter);
 	void SetNextFiber(CFiber* nextFiber);
 	void EndJob();
 	static void Log(std::string, ...);
 
 	UINT16 GetID() const { return m_id; }
 	void SetID(UINT16 id) { m_id = id; }
-	void* GetData() const { return m_pData; }
+	SJobRequest* GetJobInfo() { return &m_job; }
 
 	EFiberState GetState() const { return m_state; }
 	void SetState(EFiberState newState);
-
-	SFiberCounter* GetCounter() const { return m_pCounter; }
-	LPFIBER_START_ROUTINE GetFunction() { return m_pFuncPointer; }
 
 	void SetPrevious(CFiber* pPrevFiber) { m_pPrevFiber = pPrevFiber; }
 
 	LPVOID Address() const { return m_pFiber; }
 	bool IsActive() const { return m_state == eFS_Active; }
-private:
 
+private:
+	SJobRequest m_job;
 	UINT16 m_id;
 	size_t m_stackSize;
 	EFiberState m_state;
-	std::string m_funcName;
 	LPVOID m_pFiber;
 	CFiber* m_pPrevFiber;
 	CFiber* m_pNextFiber;
-	SFiberCounter* m_pCounter;
-	void* m_pData;
-	LPFIBER_START_ROUTINE m_pFuncPointer; //Function pointer to job
 
 #if FIBER_ENABLE_DEBUG
 	struct PersonalLogEntry
@@ -137,6 +134,8 @@ private:
 	};
 	typedef std::vector<PersonalLogEntry> TFiberPersonalLog;
 	TFiberPersonalLog m_personalLog;
+
+	static void SetThreadName(LPCSTR name = "UNNAMED");
 #endif
 };
 

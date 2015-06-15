@@ -85,6 +85,7 @@
     <ClInclude Include="Spinlock.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="WebDebugger.h" />
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +100,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ThreadFiberTest.cpp" />
+    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="WebDebugger.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -16,7 +16,7 @@
 
 namespace 
 {
-#define SCHEDULEJOB(func, prio, data) 
+#define SAFERELEASE if(x) { x->Release(); x = NULL; }
 
 	static const char* AppendNewlineChar(const char* input)
 	{

@@ -1,17 +1,11 @@
 #ifndef __CFIBERSCHEDULER_H__
 #define __CFIBERSCHEDULER_H__
 
-#include <list>
 #include <queue>
-#include <vector>
 #include <map>
-#include <atomic>
 #include <string>
-#include <Windows.h>
-#include <mutex>
 
 #include "Fiber.h"
-#include "JobQueue.h"
 #include "CoreThread.h"
 
 #define FIBER_STACK_SIZE 0
@@ -28,38 +22,31 @@ class CFiberScheduler
 {
 public:
 	CFiberScheduler();
-	~CFiberScheduler();
+	~CFiberScheduler() 
+	{
+	}
 	
-	CFiber* GetNextFiber(CFiber* terminatingFiber);
-	static void Schedule(SJobRequest& job, EFiberPriority prio, SFiberCounter* pCounter = NULL, void* data = NULL);
-	void FiberYield(CFiber* fiber, SFiberCounter* counter);
+	CFiber* AcquireNextFiber(CFiber* pOldFiber);
+	static void Schedule(SJobRequest& job, EFiberPriority prio, CFiberCounter* pCounter = NULL, void* pVData = NULL);
+	void FiberYield(CFiber* pFiber, CFiberCounter* pCounter);
 
 	void StartJobs();
 	void AllocateJobs();
 
-	bool HasJobs() { return m_bHasJobs; }
-
 private:
 	typedef std::pair<SThreadInfo, CFiber*> TActiveFibers;
-	typedef std::map<CFiber*, SFiberCounter*> TAtomicFiberMap;
-	typedef std::pair<CFiber*, SFiberCounter*> TAtomicFiberPair;
-	typedef std::vector<CFiber*> TOldFibers;
+	typedef std::map<CFiber*, CFiberCounter*> TAtomicFiberMap;
+	typedef std::pair<CFiber*, CFiberCounter*> TAtomicFiberPair;
 
-	const static UINT16 m_maxFiberPool = 32;
-	const static UINT16 m_maxRunningFibers = 1;
-	TActiveFibers m_activeFibers[m_maxRunningFibers];
-	CFiber m_fiberPool[m_maxFiberPool];
-	TAtomicFiberMap m_savedFibers;
-	TOldFibers m_oldFibers;
-	CJobQueue m_jobQueue[eFP_Num];
-	UINT64 m_nextID;
-	UINT64 m_nextCounterID;
-	UINT16 m_fiberIndex;
-	CFiber* m_staleFiber;
+	void UpdateActiveFibers(CFiber* pFiber);
 
-	bool m_bHasJobs;
+	const static UINT16 k_maxFiberPool = 32;
+	const static UINT16 k_maxRunningFibers = 1;
 
-	std::mutex m_fiberLock;
+	CFiber m_fiberPool[k_maxFiberPool];
+	TActiveFibers m_activeFibers[k_maxRunningFibers];
+	TAtomicFiberMap m_yieldedFibers;
+	std::queue<SJobRequest> m_jobQueue[eFP_Num];
 };
 
 extern CFiberScheduler* g_pFiberScheduler;

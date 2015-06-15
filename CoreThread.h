@@ -1,4 +1,3 @@
-
 #ifndef __CCORETHREAD_H__
 #define __CCORETHREAD_H__
 

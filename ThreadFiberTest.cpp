@@ -7,11 +7,13 @@
 #include <vector>
 #include <atomic>
 #include <random>
+#include <time.h>
 
 #include "MemoryManager.h"
 #include "Fiber.h"
 #include "FiberScheduler.h"
 #include "CoreThread.h"
+#include "Timer.h"
 
 // Notes
 //	(Q) Threads, how do we make one?
@@ -33,21 +35,21 @@ std::random_device rd;
 std::mt19937 rng(rd());
 std::uniform_int_distribution<int> uni(1000, 5000);
 std::uniform_int_distribution<int> uni2(0, 100000);
-std::uniform_int_distribution<int> thing(0, 1);
 
 void __stdcall YieldingTestFunc2(LPVOID lpParam)
 {
+	SJobRequest* pJobInfo = static_cast<CFiber*>(GetFiberData())->GetJobInfo();
 	srand (time(NULL));
 	CFiber::Log("Started work on decrementing the yielded counter!");
-	int* pInt = (int*)CFiber::GetDataFromFiber();
-	int randVal = uni2(rng);
+	int* pInt = (int*) pJobInfo->m_pData;
+	*pInt = uni2(rng);
 	CFiber::Log("Set int to %i", *(pInt));
 }
 
 void __stdcall YieldingTestFunc(LPVOID lpParam)
 {
 	CFiber::Log("Started work on Yielding!");
-	SFiberCounter yieldCounter(2, __FUNCTION__);
+	CFiberCounter yieldCounter(2, __FUNCTION__);
 
 	int test1 = 0;
 	int test2 = 0;
@@ -62,17 +64,6 @@ void __stdcall YieldingTestFunc(LPVOID lpParam)
 	CFiber::Log("Int values are [%i, %i]", test1, test2);
 }
 
-void __stdcall FiberFunc(LPVOID lpParam)
-{
-	CFiber::Log("Fiber has completed a (%s) priority task!", (const char*)CFiber::GetDataFromFiber());
-}
-
-void __stdcall LoggingTest(LPVOID lpParam)
-{
-	int a = 4;
-	CFiber::Log("Testing, Testing. %x", a);
-}
-
 void __stdcall WaitTest(LPVOID lpParam)
 {
 	auto random_int = uni(rng);
@@ -81,119 +72,29 @@ void __stdcall WaitTest(LPVOID lpParam)
 	CFiber::Log("Woke up!");
 }
 
-struct SSortJobData
-{
-	SSortJobData(int m, int mx, int* arr)
-		: iMin(m)
-		, iMax(mx)
-		, intArray(arr) {}
-	int iMin;
-	int iMax;
-	int* intArray;
-};
-
-class HeapDestructorTest
-{
-public:
-	HeapDestructorTest()
-	{
-		DebugLog("Constructor called");
-		testA = 1;
-		testB = 2;
-		testC = 4;
-		testD = 8;
-	}
-
-	~HeapDestructorTest()
-	{
-		DebugLog("Destructor called");
-	}
-
-private:
-	int testA;
-	int testB;
-	int testC;
-	int testD;
-};
-
-void ScheduleJobs()
-{
-	CREATEJOB(yieldJob, YieldingTestFunc);
-	CREATEJOB(waitJob, WaitTest);
-
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_High);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_High);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(yieldJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-	CFiberScheduler::Schedule(waitJob, eFP_Normal);
-
-}
-
 int _tmain(int argc, _TCHAR* argv[])
 {
 	g_pMemoryManager = new CMemoryManager();
 	g_pFiberScheduler = new CFiberScheduler();
 
-	ScheduleJobs();
+	CREATEJOB(yieldJob, YieldingTestFunc);
+	CREATEJOB(waitJob, WaitTest);
+
+	for (int i = 0 ; i < 40 ; i++)
+	{
+		CFiberScheduler::Schedule(yieldJob, eFP_Normal);
+	};
 
 	g_pFiberScheduler->StartJobs();
 
+	Timer scheduleTimer;
+	scheduleTimer.startTimer();
+
 	while (true)
 	{
-		g_pFiberScheduler->AllocateJobs();
-		if (!g_pFiberScheduler->HasJobs())
+		if (scheduleTimer.elapsedTime() > 0.5f)
 		{
-			break;
+			g_pFiberScheduler->AllocateJobs();
 		}
 	}
 
