@@ -17,6 +17,7 @@
 namespace 
 {
 #define SAFERELEASE if(x) { x->Release(); x = NULL; }
+#define BIT(x) 1 << x
 
 	static const char* AppendNewlineChar(const char* input)
 	{

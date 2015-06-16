@@ -48,6 +48,7 @@ bool CFiber::Bind(SJobRequest& job)
 		return false;
 	}
 	m_job = job;
+	SetState(eFS_Bound);
 	return true;
 }
 
@@ -57,6 +58,7 @@ void CFiber::Release()
 	if (m_pFiber)
 	{
 		DeleteFiber(m_pFiber);
+		m_pFiber = NULL;
 		SetState(eFS_InActive);
 	}
 }
@@ -112,9 +114,9 @@ void CFiber::ReleasePrevious()
 
 void CFiber::SetNextFiber(CFiber* nextFiber)
 {
-	SetState(eFS_Bound);
 	if (!m_pNextFiber)
 	{
+		SetState(eFS_HasNextFiber);
 		m_pNextFiber = nextFiber;
 	}
 	else

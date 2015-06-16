@@ -77,6 +77,7 @@ public:
 		eFS_Active,
 		eFS_WaitingForJob,
 		eFS_Bound,
+		eFS_HasNextFiber,
 		eFS_Finished,
 		eFS_Releasing,
 		eFS_Yielded

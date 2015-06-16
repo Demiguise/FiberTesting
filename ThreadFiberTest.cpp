@@ -72,6 +72,13 @@ void __stdcall WaitTest(LPVOID lpParam)
 	CFiber::Log("Woke up!");
 }
 
+void __stdcall LastJob(LPVOID lpParam)
+{
+	CFiber::Log("-------------------");
+	CFiber::Log("Last Job Complete!");
+	CFiber::Log("-------------------");
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	g_pMemoryManager = new CMemoryManager();
@@ -79,11 +86,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	CREATEJOB(yieldJob, YieldingTestFunc);
 	CREATEJOB(waitJob, WaitTest);
+	CREATEJOB(lastJob, LastJob);
 
 	for (int i = 0 ; i < 40 ; i++)
 	{
 		CFiberScheduler::Schedule(yieldJob, eFP_Normal);
 	};
+
+	CFiberScheduler::Schedule(lastJob, eFP_Normal);
 
 	g_pFiberScheduler->StartJobs();
 
@@ -95,7 +105,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		if (scheduleTimer.elapsedTime() > 0.5f)
 		{
 			g_pFiberScheduler->AllocateJobs();
+			if (!g_pFiberScheduler->IsActive())
+			{
+				break;
+			}
 		}
+	}
+
+	DebugLog("Done with fiber jobs!");
+
+	while (true)
+	{
 	}
 
 	return 0;

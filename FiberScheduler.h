@@ -32,6 +32,28 @@ public:
 
 	void StartJobs();
 	void AllocateJobs();
+	bool IsActive()
+	{
+		for (int i = 0 ; i < k_maxRunningFibers; ++i)
+		{
+			CFiber::EFiberState state = m_activeFibers[i].second->GetState();
+			if ((state == CFiber::eFS_Active)				|| 
+					(state == CFiber::eFS_HasNextFiber) ||
+					(state == CFiber::eFS_Yielded)			||
+					(state == CFiber::eFS_Finished))
+			{
+				return true;
+			}
+		}
+		for (int i = 0 ; i < eFP_Num ; ++i)
+		{
+			if (!m_jobQueue[i].empty())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
 private:
 	typedef std::pair<SThreadInfo, CFiber*> TActiveFibers;

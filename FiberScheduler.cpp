@@ -25,6 +25,7 @@ CFiber* CFiberScheduler::AcquireNextFiber(CFiber* pOldFiber)
 		{
 			boundFiber = it->first;
 			m_yieldedFibers.erase(it);
+			boundFiber->SetPrevious(pOldFiber);
 			return boundFiber;
 		}
 		it++;
@@ -99,6 +100,8 @@ void CFiberScheduler::FiberYield(CFiber* pFiber, CFiberCounter* pCounter)
 	UpdateActiveFibers(pNextFiber);
 
 	SwitchToFiber(pNextFiber->Address());
+
+	pFiber->ReleasePrevious();
 
 	pFiber->SetState(CFiber::eFS_Active);
 }
