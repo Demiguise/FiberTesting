@@ -33,11 +33,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	Timer scheduleTimer;
 	scheduleTimer.startTimer();
 
+	UINT64 cycleCount;
+
 	while (true)
 	{
 		if (scheduleTimer.elapsedTime() > 0.5f)
 		{
+			cycleCount = __rdtsc();
 			g_pFiberScheduler->AllocateJobs();
+			DebugLog("CycleTimes");
+			DebugLog("%d", (__rdtsc() - cycleCount));
 			if (!g_pFiberScheduler->IsActive())
 			{
 				break;
