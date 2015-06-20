@@ -7,8 +7,10 @@
 
 #include "Fiber.h"
 #include "CoreThread.h"
+#include <mutex>
 
 #define FIBER_STACK_SIZE 0
+#define GETJOBINFO(type) (type)static_cast<CFiber*>(GetFiberData())->GetJobInfo()->m_pData
 
 enum EFiberPriority
 {
@@ -37,10 +39,7 @@ public:
 		for (int i = 0 ; i < k_maxRunningFibers; ++i)
 		{
 			CFiber::EFiberState state = m_activeFibers[i].second->GetState();
-			if ((state == CFiber::eFS_Active)				|| 
-					(state == CFiber::eFS_HasNextFiber) ||
-					(state == CFiber::eFS_Yielded)			||
-					(state == CFiber::eFS_Finished))
+			if (state != CFiber::eFS_WaitingForJob)
 			{
 				return true;
 			}
@@ -63,7 +62,7 @@ private:
 	void UpdateActiveFibers(CFiber* pFiber);
 
 	const static UINT16 k_maxFiberPool = 32;
-	const static UINT16 k_maxRunningFibers = 1;
+	const static UINT16 k_maxRunningFibers = 4;
 
 	CFiber m_fiberPool[k_maxFiberPool];
 	TActiveFibers m_activeFibers[k_maxRunningFibers];

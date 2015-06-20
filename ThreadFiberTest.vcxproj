@@ -78,11 +78,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreThread.h" />
+    <ClInclude Include="EnVectors.h" />
     <ClInclude Include="Fiber.h" />
     <ClInclude Include="FiberScheduler.h" />
     <ClInclude Include="JobQueue.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="MemoryManager.h" />
+    <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Spinlock.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -91,11 +93,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CoreThread.cpp" />
+    <ClCompile Include="EnVectors.cpp" />
     <ClCompile Include="Fiber.cpp" />
     <ClCompile Include="FiberScheduler.cpp" />
     <ClCompile Include="JobQueue.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="MemoryManager.cpp" />
+    <ClCompile Include="RayTracer.cpp" />
     <ClCompile Include="Spinlock.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

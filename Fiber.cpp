@@ -91,12 +91,13 @@ void CFiber::ReleasePrevious()
 
 	if (m_pPrevFiber)
 	{
-		if (m_pPrevFiber->GetState() == eFS_Finished)
+		CFiber::EFiberState state = m_pPrevFiber->GetState();
+		if (state == eFS_Finished)
 		{
 			m_pPrevFiber->Release();
 			m_pPrevFiber = NULL;
 		}
-		else
+		else if (state != eFS_Yielded)
 		{
 			Log("Last fiber hasn't finished yet?");
 			DebugBreak();
@@ -107,16 +108,28 @@ void CFiber::ReleasePrevious()
 /*Static*/ void CFiber::YieldForCounter(CFiberCounter* counter)
 {
 	CFiber* pFiber = (CFiber*)GetFiberData();
-	Log("Yielding for function (%s) counter", counter->GetName());
 	g_pFiberScheduler->FiberYield(pFiber, counter);
-	Log("Finished yielding");
+
+	assert(!pFiber->m_pNextFiber);
+
+	while (!pFiber->m_pNextFiber)
+	{
+	}
+
+	SwitchToFiber(pFiber->m_pNextFiber->Address());
+
+	pFiber->ReleasePrevious();
+	pFiber->SetState(CFiber::eFS_Active);
 }
 
 void CFiber::SetNextFiber(CFiber* nextFiber)
 {
 	if (!m_pNextFiber)
 	{
-		SetState(eFS_HasNextFiber);
+		if (m_state != eFS_Yielded)
+		{
+			SetState(eFS_HasNextFiber);
+		}
 		m_pNextFiber = nextFiber;
 	}
 	else

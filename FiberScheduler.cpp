@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "FiberScheduler.h"
-
 #include "CoreThread.h"
 
 extern CFiberScheduler* g_pFiberScheduler = 0;
+
+std::mutex enQueueLock;
 
 CFiberScheduler::CFiberScheduler()
 {
@@ -45,11 +46,18 @@ CFiber* CFiberScheduler::AcquireNextFiber(CFiber* pOldFiber)
 	{
 		if (!m_jobQueue[i].empty())
 		{
+			enQueueLock.lock();
 			SJobRequest job = m_jobQueue[i].front();
 			boundFiber->Bind(job);
 			m_jobQueue[i].pop();
+			enQueueLock.unlock();
 			break;
 		}
+	}
+
+	if (boundFiber->GetState() != CFiber::eFS_Bound)
+	{
+		return NULL;
 	}
 
 	boundFiber->SetPrevious(pOldFiber);
@@ -74,12 +82,20 @@ void CFiberScheduler::AllocateJobs()
 {
 	for (int i = 0 ; i < k_maxRunningFibers ; ++i)
 	{
-		CFiber* pFiber = m_activeFibers[i].second;
-		if (pFiber && pFiber->GetState() == CFiber::eFS_WaitingForJob)
+		if (CFiber* pFiber = m_activeFibers[i].second)
 		{
-			CFiber* newFiber = AcquireNextFiber(pFiber);
-			pFiber->SetNextFiber(newFiber);
-			m_activeFibers[i].second = newFiber;
+			CFiber::EFiberState state = pFiber->GetState();
+			switch (state)
+			{
+			case CFiber::eFS_Yielded:
+			case CFiber::eFS_WaitingForJob:
+				if (CFiber* newFiber = AcquireNextFiber(pFiber))
+				{
+					pFiber->SetNextFiber(newFiber);
+					m_activeFibers[i].second = newFiber;
+				}
+				break;
+			}
 		}
 	}
 }
@@ -88,22 +104,15 @@ void CFiberScheduler::AllocateJobs()
 {
 	job.m_pData = pVData;
 	job.m_pCounter = pCounter;
+	enQueueLock.lock();
 	g_pFiberScheduler->m_jobQueue[prio].push(job);
+	enQueueLock.unlock();
 }
 
 void CFiberScheduler::FiberYield(CFiber* pFiber, CFiberCounter* pCounter)
 {
 	pFiber->SetState(CFiber::eFS_Yielded);
 	m_yieldedFibers.insert(TAtomicFiberPair(pFiber, pCounter));
-
-	CFiber* pNextFiber = AcquireNextFiber(NULL);
-	UpdateActiveFibers(pNextFiber);
-
-	SwitchToFiber(pNextFiber->Address());
-
-	pFiber->ReleasePrevious();
-
-	pFiber->SetState(CFiber::eFS_Active);
 }
 
 void CFiberScheduler::UpdateActiveFibers(CFiber* pFiber)

@@ -11,6 +11,13 @@
 
 class CFiber;
 
+class CFiberJobData
+{
+public:
+	CFiberJobData() {}
+	~CFiberJobData() {}
+};
+
 typedef std::atomic<int> TCounter;
 class CFiberCounter
 {
@@ -34,7 +41,7 @@ private:
 };
 
 
-#define CREATEJOB(name, func) SJobRequest name(func, #func)
+#define CREATEJOB(name, func) SJobRequest name((LPFIBER_START_ROUTINE)func, #func)
 
 struct SJobRequest
 {
