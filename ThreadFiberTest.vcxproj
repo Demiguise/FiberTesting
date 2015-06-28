@@ -10,6 +10,42 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Common\EnMatrix.cpp" />
+    <ClCompile Include="Source\Common\EnVectors.cpp" />
+    <ClCompile Include="Source\Common\Spinlock.cpp" />
+    <ClCompile Include="Source\Common\Timer.cpp" />
+    <ClCompile Include="Source\Debug\PerfDB.cpp" />
+    <ClCompile Include="Source\Debug\ScopedTimer.cpp" />
+    <ClCompile Include="Source\Fibers\CoreThread.cpp" />
+    <ClCompile Include="Source\Fibers\Fiber.cpp" />
+    <ClCompile Include="Source\Fibers\FiberScheduler.cpp" />
+    <ClCompile Include="Source\Fibers\JobQueue.cpp" />
+    <ClCompile Include="Source\Fibers\MemoryManager.cpp" />
+    <ClCompile Include="Source\lodepng.cpp" />
+    <ClCompile Include="Source\RayTracer.cpp" />
+    <ClCompile Include="Source\stdafx.cpp" />
+    <ClCompile Include="Source\ThreadFiberTest.cpp" />
+    <ClCompile Include="Source\WebDebugger\WebDebugger.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Common\EnMatrix.h" />
+    <ClInclude Include="Source\Common\EnVectors.h" />
+    <ClInclude Include="Source\Common\Spinlock.h" />
+    <ClInclude Include="Source\Common\Timer.h" />
+    <ClInclude Include="Source\Debug\PerfDB.h" />
+    <ClInclude Include="Source\Debug\ScopedTimer.h" />
+    <ClInclude Include="Source\Fibers\CoreThread.h" />
+    <ClInclude Include="Source\Fibers\Fiber.h" />
+    <ClInclude Include="Source\Fibers\FiberScheduler.h" />
+    <ClInclude Include="Source\Fibers\JobQueue.h" />
+    <ClInclude Include="Source\Fibers\MemoryManager.h" />
+    <ClInclude Include="Source\lodepng.h" />
+    <ClInclude Include="Source\RayTracer.h" />
+    <ClInclude Include="Source\stdafx.h" />
+    <ClInclude Include="Source\targetver.h" />
+    <ClInclude Include="Source\WebDebugger\WebDebugger.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0D1C7123-E407-4EE2-BD38-EEB6B78898BA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -41,24 +77,39 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(PlatformTarget)\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(PlatformTarget)\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\glfw-3.1.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)Build\$(Configuration)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\ThreadFiberTest;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Libs\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo - Copying DLLs
+copy $(SolutionDir)DLLs\*.dll $(OutputPath) /Y
+echo - Copying Assets
+xcopy $(SolutionDir)Assets $(OutputPath)Assets /i /y /s /f
+echo - Copying PDBs
+copy $(IntermediateOutputPath)*.pdb $(OutputPath) /Y
+echo - Deleting *.ilk
+del $(OutputPath)*.ilk</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -68,6 +119,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Source;$(SolutionDir)Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -76,46 +128,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CoreThread.h" />
-    <ClInclude Include="EnVectors.h" />
-    <ClInclude Include="Fiber.h" />
-    <ClInclude Include="FiberScheduler.h" />
-    <ClInclude Include="JobQueue.h" />
-    <ClInclude Include="lodepng.h" />
-    <ClInclude Include="MemoryManager.h" />
-    <ClInclude Include="PerfDB.h" />
-    <ClInclude Include="RayTracer.h" />
-    <ClInclude Include="ScopedTimer.h" />
-    <ClInclude Include="Spinlock.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="WebDebugger.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="CoreThread.cpp" />
-    <ClCompile Include="EnVectors.cpp" />
-    <ClCompile Include="Fiber.cpp" />
-    <ClCompile Include="FiberScheduler.cpp" />
-    <ClCompile Include="JobQueue.cpp" />
-    <ClCompile Include="lodepng.cpp" />
-    <ClCompile Include="MemoryManager.cpp" />
-    <ClCompile Include="PerfDB.cpp" />
-    <ClCompile Include="RayTracer.cpp" />
-    <ClCompile Include="ScopedTimer.cpp" />
-    <ClCompile Include="Spinlock.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ThreadFiberTest.cpp" />
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="WebDebugger.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

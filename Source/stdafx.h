@@ -17,6 +17,7 @@
 
 #define FIBER_OUTPUT_ON 0
 
+
 namespace 
 {
 #define SAFEFIBERRELEASE if(x) { x->Release(); x = NULL; }

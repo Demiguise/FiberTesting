@@ -1,7 +1,7 @@
 #ifndef __JOBQUEUE_H__
 #define __JOBQUEUE_H__
 
-#include "Spinlock.h"
+#include "Common/Spinlock.h"
 #include "Fiber.h"
 #include <queue>
 

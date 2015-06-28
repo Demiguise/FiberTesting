@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "JobQueue.h"
 
-
 CJobQueue::CJobQueue()
 {
 }

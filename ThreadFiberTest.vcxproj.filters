@@ -13,102 +13,117 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{455da82b-bb70-4a44-9c73-b348ddc9dc35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Debug">
+      <UniqueIdentifier>{3e72f0f1-6276-4509-8d24-8e3c2994ecfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Fibers">
+      <UniqueIdentifier>{46d61088-be08-4f00-aead-106050622fba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WebDebugger">
+      <UniqueIdentifier>{e8ff9ebf-be66-4011-9307-77041231d844}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClCompile Include="Source\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RayTracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Fibers\Fiber.cpp">
+      <Filter>Source Files\Fibers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Fibers\FiberScheduler.cpp">
+      <Filter>Source Files\Fibers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Fibers\CoreThread.cpp">
+      <Filter>Source Files\Fibers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\EnMatrix.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\EnVectors.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Fibers\JobQueue.cpp">
+      <Filter>Source Files\Fibers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Fibers\MemoryManager.cpp">
+      <Filter>Source Files\Fibers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Debug\PerfDB.cpp">
+      <Filter>Source Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Debug\ScopedTimer.cpp">
+      <Filter>Source Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\Spinlock.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\Timer.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WebDebugger\WebDebugger.cpp">
+      <Filter>Source Files\WebDebugger</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThreadFiberTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FiberScheduler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Fiber.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WebDebugger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Spinlock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="JobQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lodepng.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RayTracer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EnVectors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScopedTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PerfDB.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
+    <ClInclude Include="Source\lodepng.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadFiberTest.cpp">
+    </ClInclude>
+    <ClInclude Include="Source\RayTracer.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreThread.cpp">
+    </ClInclude>
+    <ClInclude Include="Source\stdafx.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FiberScheduler.cpp">
+    </ClInclude>
+    <ClInclude Include="Source\targetver.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Fiber.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MemoryManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WebDebugger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Spinlock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="JobQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lodepng.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RayTracer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EnVectors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ScopedTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PerfDB.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    </ClInclude>
+    <ClInclude Include="Source\Fibers\Fiber.h">
+      <Filter>Source Files\Fibers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Fibers\FiberScheduler.h">
+      <Filter>Source Files\Fibers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Fibers\CoreThread.h">
+      <Filter>Source Files\Fibers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\EnMatrix.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\EnVectors.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Fibers\JobQueue.h">
+      <Filter>Source Files\Fibers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Fibers\MemoryManager.h">
+      <Filter>Source Files\Fibers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Debug\PerfDB.h">
+      <Filter>Source Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Debug\ScopedTimer.h">
+      <Filter>Source Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\Spinlock.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\Timer.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\WebDebugger\WebDebugger.h">
+      <Filter>Source Files\WebDebugger</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

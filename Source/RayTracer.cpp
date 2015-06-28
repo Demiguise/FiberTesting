@@ -1,9 +1,9 @@
 #include "stdafx.h"
 
 #include "RayTracer.h"
-#include "FiberScheduler.h"
+#include "Fibers/FiberScheduler.h"
 #include "lodepng.h"
-#include "ScopedTimer.h"
+#include "Debug/ScopedTimer.h"
 
 #include <vector>
 

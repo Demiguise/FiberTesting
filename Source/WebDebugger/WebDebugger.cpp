@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "WebDebugger.h"
-#include "FiberScheduler.h"
+#include "Fibers/FiberScheduler.h"
 
 CWebDebugger::CWebDebugger()
 {

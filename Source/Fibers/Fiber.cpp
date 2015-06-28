@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Fiber.h"
 #include "FiberScheduler.h"
-#include "ScopedTimer.h"
+#include "Debug/ScopedTimer.h"
 
 static const char* FiberStateStrings[] =
 {

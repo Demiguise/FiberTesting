@@ -3,9 +3,9 @@
 
 #include <windows.h>
 #include <vector>
-#include "EnVectors.h"
+#include "Common/EnVectors.h"
 
-#include "GLFW/glfw3.h"
+#include "glfw3.h"
 
 struct PixelCoord
 {

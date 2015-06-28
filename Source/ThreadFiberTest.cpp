@@ -1,12 +1,12 @@
 #include "stdafx.h"
 
 #include <vector>
-#include "FiberScheduler.h"
-#include "Timer.h"
+#include "Fibers/FiberScheduler.h"
+#include "Common/Timer.h"
 #include "RayTracer.h"
-#include "PerfDB.h"
+#include "Debug/PerfDB.h"
 
-#include "GLFW/glfw3.h"
+#include "glfw3.h"
 #include <math.h>
 
 static bool bTracingStarted = false;
