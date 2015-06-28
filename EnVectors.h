@@ -36,6 +36,7 @@ public:
 	EnVector3 MatrixMult4x4(const EnMatrix4x4& rhs) const;
 	EnVector3 Normalized();
 	float GetMagnitude() const;
+	float GetSqMagnitude() const;
 	EnVector3& operator+= (const EnVector3& rhs);
 	EnVector3& operator-= (const EnVector3& rhs);
 	float& operator[] (int index);
@@ -68,6 +69,7 @@ public:
 };
 EnVector4 operator+ (EnVector4 lhs, const EnVector4& rhs);
 EnVector4 operator- (EnVector4 lhs, const EnVector4& rhs);
+EnVector4 operator* (EnVector4 lhs, const float& rhs);
 
 namespace Util
 {

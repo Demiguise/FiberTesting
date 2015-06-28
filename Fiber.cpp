@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Fiber.h"
 #include "FiberScheduler.h"
+#include "ScopedTimer.h"
 
 static const char* FiberStateStrings[] =
 {
@@ -37,19 +38,19 @@ void CFiber::Init(UINT16 id, size_t stackSize)
 	m_stackSize = stackSize;
 }
 
-bool CFiber::Bind(SJobRequest& job)
+void CFiber::Bind(SJobRequest& job)
 {
 	assert(!m_pFiber);
-
-	m_pFiber = CreateFiber(m_stackSize, CFiber::Run, this);
-	if (!m_pFiber)
+	
+	if (m_pFiber = CreateFiber(m_stackSize, CFiber::Run, this))
+	{
+		m_job = job;
+		SetState(eFS_Bound);
+	}
+	else
 	{
 		Log("CreateFiber error (%d)\n", GetLastError());
-		return false;
 	}
-	m_job = job;
-	SetState(eFS_Bound);
-	return true;
 }
 
 void CFiber::Release()
@@ -87,17 +88,17 @@ void CFiber::SetState(EFiberState newState)
 
 void CFiber::ReleasePrevious()
 {
+	PERFTIMER_FUNC();
 	m_pNextFiber = NULL;
 
 	if (m_pPrevFiber)
 	{
-		CFiber::EFiberState state = m_pPrevFiber->GetState();
-		if (state == eFS_Finished)
+		if (m_pPrevFiber->GetState() == eFS_Finished)
 		{
 			m_pPrevFiber->Release();
 			m_pPrevFiber = NULL;
 		}
-		else if (state != eFS_Yielded)
+		else if (m_pPrevFiber->GetState() != eFS_Yielded)
 		{
 			Log("Last fiber hasn't finished yet?");
 			DebugBreak();
@@ -140,6 +141,7 @@ void CFiber::SetNextFiber(CFiber* nextFiber)
 
 void CFiber::EndJob()
 {
+	PERFTIMER_FUNC();
 	if (CFiberCounter* pCounter = m_job.m_pCounter)
 	{
 		pCounter->DecrementCounter();
@@ -158,6 +160,8 @@ void CFiber::EndJob()
 	SwitchToFiber(m_pNextFiber->Address());
 }
 
+
+
 /*Static*/ void CFiber::Log(std::string frmt, ...)
 {
 	if (CFiber* pFiber = (CFiber*)GetFiberData())
@@ -166,15 +170,22 @@ void CFiber::EndJob()
 		sprintf_s(buffer, "[F:%u] ", pFiber->GetID());
 
 		frmt.insert(0, buffer);
+		if (!pFiber->m_personalLog.empty())
+		{
+			float timeFromLast = Timer::GetTimeBetween(pFiber->m_personalLog.back().timeStamp, Timer::GetCountNow());
+			sprintf_s(buffer, " [%f]", timeFromLast);
+			frmt.insert(frmt.length(), buffer);
+		}
 		frmt.append("\n");
 		va_list args;
 		va_start(args, frmt);
 		vsnprintf_s(buffer, 512, frmt.c_str(), args);
 		va_end(args);
+#if FIBER_OUTPUT_ON
 		PushToLogs(buffer);
-#if FIBER_ENABLE_DEBUG
+#endif //~FIBER_OUTPUT_ON
+
 		pFiber->m_personalLog.push_back(PersonalLogEntry(GetCurrentThreadId(), buffer));
-#endif
 	}
 }
 

@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "Timer.h"
+
 #define FIBER_ENABLE_DEBUG 1
 
 class CFiber;
@@ -16,6 +18,45 @@ class CFiberJobData
 public:
 	CFiberJobData() {}
 	~CFiberJobData() {}
+
+	void AddData(const int data)
+	{
+		UJobData newData;
+		newData.i = data;
+		m_datas.push_back(newData);
+	}
+	void AddData(const float data)
+	{
+		UJobData newData;
+		newData.f = data;
+		m_datas.push_back(newData);
+	}
+	void AddData(const bool data)
+	{
+		UJobData newData;
+		newData.b = data;
+		m_datas.push_back(newData);
+	}
+	void AddData(void* data)
+	{
+		UJobData newData;
+		newData.pV = data;
+		m_datas.push_back(newData);
+	}
+
+	int GetInt(const int index) { return m_datas[index].i; }
+	float GetFloat(const int index) { return m_datas[index].f; }
+	bool GetBool(const int index) { return m_datas[index].b; }
+	void* GetPointer(const int index) { return m_datas[index].pV; }
+private:
+	union UJobData
+	{
+		int i;
+		float f;
+		bool b;
+		void* pV;
+	};
+	std::vector<UJobData> m_datas;
 };
 
 typedef std::atomic<int> TCounter;
@@ -47,14 +88,12 @@ struct SJobRequest
 {
 	SJobRequest()
 		: m_pFunc(NULL)
-		, m_pData(NULL)
 		, m_pCounter(NULL)
 		, m_pFiber(NULL) {}
 
 	SJobRequest(LPFIBER_START_ROUTINE job, std::string jobName)
 		: m_jobName(jobName)
 		, m_pFunc(job)
-		, m_pData(NULL)
 		, m_pCounter(NULL)
 		, m_pFiber(NULL) {}
 
@@ -62,7 +101,7 @@ struct SJobRequest
 	{
 		m_jobName = rhs.m_jobName;
 		m_pFunc = rhs.m_pFunc;
-		m_pData = rhs.m_pData;
+		m_jobData = rhs.m_jobData;
 		m_pCounter = rhs.m_pCounter;
 		m_pFiber = rhs.m_pFiber;
 		return *this;
@@ -70,7 +109,7 @@ struct SJobRequest
 
 	std::string m_jobName;
 	LPFIBER_START_ROUTINE m_pFunc;
-	void* m_pData;
+	CFiberJobData m_jobData;
 	CFiberCounter* m_pCounter;
 	CFiber* m_pFiber;
 };
@@ -98,7 +137,7 @@ public:
 	}
 
 	void Init(UINT16 id, size_t stack);
-	bool Bind(SJobRequest& job);
+	void Bind(SJobRequest& job);
 	void Release();
 
 	static void __stdcall Run(LPVOID lpParam);
@@ -114,8 +153,8 @@ public:
 	void SetID(UINT16 id) { m_id = id; }
 	SJobRequest* GetJobInfo() { return &m_job; }
 
-	EFiberState GetState() const { return m_state; }
-	void SetState(EFiberState newState);
+	EFiberState inline GetState() const { return m_state; }
+	void inline SetState(EFiberState newState);
 
 	void SetPrevious(CFiber* pPrevFiber) { m_pPrevFiber = pPrevFiber; }
 
@@ -131,20 +170,22 @@ private:
 	CFiber* m_pPrevFiber;
 	CFiber* m_pNextFiber;
 
-#if FIBER_ENABLE_DEBUG
 	struct PersonalLogEntry
 	{
 		PersonalLogEntry(DWORD id, std::string line)
 			: threadID(id)
-			,	entry(line) {}
+			,	entry(line)
+		{
+			timeStamp = Timer::GetCountNow();
+		}
 		DWORD threadID;
 		std::string entry;
+		UINT64 timeStamp;
 	};
 	typedef std::vector<PersonalLogEntry> TFiberPersonalLog;
 	TFiberPersonalLog m_personalLog;
 
 	static void SetThreadName(LPCSTR name = "UNNAMED");
-#endif
 };
 
 #endif //~__CFIBER_H__

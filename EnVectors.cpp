@@ -133,10 +133,12 @@ EnVector3 EnVector3::Normalized()
 
 float EnVector3::GetMagnitude() const
 {
-	float a = x * x;
-	float b = y * y;
-	float c = z * z;
-	return sqrt(a+b+c);
+	return sqrt(GetSqMagnitude());
+}
+
+float EnVector3::GetSqMagnitude() const
+{
+	return (x*x) + (y*y) + (z*z);
 }
 
 //Member operators
@@ -190,12 +192,11 @@ EnVector3 operator+ (EnVector3 lhs, const EnVector3& rhs)
 
 EnVector3 operator* (EnVector3 lhs, const float& rhs)
 {
-	lhs.x * rhs;
-	lhs.y * rhs;
-	lhs.z * rhs;
+	lhs.x *= rhs;
+	lhs.y *= rhs;
+	lhs.z *= rhs;
 	return lhs;
 }
-
 
 //======== Engine Vector4 (Aka, 4 dimensional vector)
 EnVector4::EnVector4()
@@ -284,6 +285,16 @@ EnVector4 operator+ (EnVector4 lhs, const EnVector4& rhs)
 	lhs += rhs;
 	return lhs;
 }
+
+EnVector4 operator* (EnVector4 lhs, const float& rhs)
+{
+	lhs.x *= rhs;
+	lhs.y *= rhs;
+	lhs.z *= rhs;
+	lhs.w *= rhs;
+	return lhs;
+}
+
 
 namespace Util
 {

@@ -15,10 +15,15 @@
 #include <Windows.h>
 #include <stdint.h>
 
+#define FIBER_OUTPUT_ON 0
+
 namespace 
 {
-#define SAFERELEASE if(x) { x->Release(); x = NULL; }
+#define SAFEFIBERRELEASE if(x) { x->Release(); x = NULL; }
 #define BIT(x) 1 << x
+
+	const static int gWinHeight = 320;
+	const static int gWinWidth = 480;
 
 	static const char* AppendNewlineChar(const char* input)
 	{
@@ -45,5 +50,21 @@ namespace
 		va_end(args);
 		PushToLogs((LPCSTR)buffer);
 		delete newLogLine;
+	}
+
+	static float Clampf(const float val, const float minVal, const float maxVal)
+	{
+		if (val < minVal)
+		{
+			return minVal;
+		}
+		else if (val > maxVal)
+		{
+			return maxVal;
+		}
+		else
+		{
+			return val;
+		}
 	}
 }

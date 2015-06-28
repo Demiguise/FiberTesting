@@ -5,6 +5,8 @@
 #include <vector>
 #include "EnVectors.h"
 
+#include "GLFW/glfw3.h"
+
 struct PixelCoord
 {
 	PixelCoord ()
@@ -24,30 +26,43 @@ struct SSphere
 	float r;
 };
 
+//Considered Omni white light
+struct SLight
+{
+	EnVector3	pos;
+	float str;
+	int id;
+};
+
 typedef std::vector<SSphere> TSceneGeom;
+typedef std::vector<SLight> TSceneLights;
+
+struct SSceneInfo
+{
+	TSceneGeom geom;
+	TSceneLights lights;
+};
 
 struct SRayCastInfo
 {
+	SRayCastInfo()
+		: pHitGeom(NULL) {}
 	EnVector3 pos;
 	EnVector3 normal;
+	SSphere* pHitGeom;
 };
 
-struct SPixelJobData
+struct SPixelData
 {
+	SPixelData()
+		:	pos(0,0)
+		,	geom(NULL)
+		,	finalColour(0.f,0.f,0.f,255.f)
+	{
+	}
 	PixelCoord pos;
 	TSceneGeom* geom;
 	EnVector4 finalColour;
-};
-
-struct SChunk
-{
-	int w;
-	int h;
-	int x;
-	int y;
-	int id;
-	TSceneGeom* geom;
-	std::vector<SPixelJobData>* m_jobDatas;
 };
 
 class CRayTracer
@@ -57,17 +72,24 @@ public:
 	~CRayTracer();
 
 	void OutputImage();
-
-	static void __stdcall SeedChunk(LPVOID lpParam);
-	static void __stdcall CalculatePixelColour(LPVOID lpParam);
-	static bool CastRay(const EnVector3 pos, const EnVector3 dir, SSphere* pGeom, SRayCastInfo& info);
+	void GetGLPixelOutput(GLfloat* pOutput);
+	SPixelData* GetPixelDataForPos(const int x, const int y) 
+	{ 
+		return &m_jobDatas[x][y]; 
+	}
 
 private:
-	static const int kWidth = 480;
-	static const int kHeight = 320;
-	TSceneGeom m_geom;
-	std::vector<SPixelJobData> m_jobDatas[kWidth];
-	std::vector<SChunk> m_chunks;
+	static void __stdcall SeedChunk(LPVOID lpParam);
+	static void __stdcall CalculatePixelColour(LPVOID lpParam);
+	static SRayCastInfo FindClosestPoint(const EnVector3& pos, const EnVector3& dir, TSceneGeom* pGeom);
+	static bool CastRay(const EnVector3& pos, const EnVector3& dir, SSphere* pGeom, SRayCastInfo& info);
+	static EnVector4 CalculateLighting(SRayCastInfo& info, SSceneInfo* pScene);
+
+	typedef std::vector<SPixelData> TPixelData;
+	SSceneInfo m_scene;
+	TPixelData m_jobDatas[gWinWidth];
 };
+
+extern CRayTracer* g_pRayTracer;
 
 #endif //~__CRAYTRACER_H_

@@ -1,0 +1,22 @@
+Sqing' Shit
+
+JPS: 224 | TPJ: 0.018048
+	[CRayTracer::CalculatePixelColour] N: 224 | AvgPN:0.000299 | (0.000094...0.002765) | Total:0.066958
+	[CRayTracer::CastRay] N: 1120 | AvgPN:0.000001 | (0.000000...0.000002) | Total:0.000610
+	[CRayTracer::FindClosestPoint] N: 224 | AvgPN:0.000276 | (0.000080...0.002747) | Total:0.061716
+
+Added more debug
+
+JPS: 224 | ATPJ: 0.017837 | (0.013568...0.022160) | Total:3.995585
+	[CRayTracer::CalculatePixelColour] N: 224 | AvgPN:0.000294 | (0.000094...0.002963) | Total:0.065952
+	[CRayTracer::CastRay] N: 1120 | AvgPN:0.000001 | (0.000000...0.000002) | Total:0.000603
+	[CRayTracer::FindClosestPoint] N: 224 | AvgPN:0.000265 | (0.000081...0.000925) | Total:0.059373
+
+Is binding/Running/Releasing the issue?
+
+JPS: 228 | ATPJ: 0.017559 | (0.013560...0.021462) | Total:1.000858
+	[CFiber::Bind (CREATEFIBER)] N: 228 | AvgPN:0.000016 | (0.000008...0.000126) | Total:0.003537
+	[CFiber::ReleasePrevious] N: 228 | AvgPN:0.000011 | (0.000008...0.000016) | Total:0.002449
+	[CRayTracer::CalculatePixelColour] N: 228 | AvgPN:0.000139 | (0.000090...0.003064) | Total:0.031654
+	[CRayTracer::CastRay] N: 1140 | AvgPN:0.000000 | (0.000000...0.000005) | Total:0.000564
+	[CRayTracer::FindClosestPoint] N: 228 | AvgPN:0.000119 | (0.000077...0.003050) | Total:0.027142

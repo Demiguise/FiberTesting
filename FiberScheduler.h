@@ -7,10 +7,11 @@
 
 #include "Fiber.h"
 #include "CoreThread.h"
+#include "Timer.h"
 #include <mutex>
 
 #define FIBER_STACK_SIZE 0
-#define GETJOBINFO(type) (type)static_cast<CFiber*>(GetFiberData())->GetJobInfo()->m_pData
+#define GETJOBINFO static_cast<CFiber*>(GetFiberData())->GetJobInfo()->m_jobData
 
 enum EFiberPriority
 {
@@ -29,7 +30,7 @@ public:
 	}
 	
 	CFiber* AcquireNextFiber(CFiber* pOldFiber);
-	static void Schedule(SJobRequest& job, EFiberPriority prio, CFiberCounter* pCounter = NULL, void* pVData = NULL);
+	static void Schedule(SJobRequest& job, EFiberPriority prio, CFiberJobData& data, CFiberCounter* pCounter = NULL);
 	void FiberYield(CFiber* pFiber, CFiberCounter* pCounter);
 
 	void StartJobs();
@@ -54,6 +55,8 @@ public:
 		return false;
 	}
 
+	void PrintAverageJobTime();
+
 private:
 	typedef std::pair<SThreadInfo, CFiber*> TActiveFibers;
 	typedef std::map<CFiber*, CFiberCounter*> TAtomicFiberMap;
@@ -63,6 +66,10 @@ private:
 
 	const static UINT16 k_maxFiberPool = 32;
 	const static UINT16 k_maxRunningFibers = 4;
+
+	typedef std::map<CFiber*, Timer> TTimerMap;
+	TTimerMap m_activeTimers;
+	std::vector<float> m_avgTimes;
 
 	CFiber m_fiberPool[k_maxFiberPool];
 	TActiveFibers m_activeFibers[k_maxRunningFibers];

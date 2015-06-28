@@ -57,6 +57,12 @@
     <ClInclude Include="EnVectors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScopedTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PerfDB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -96,6 +102,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EnVectors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScopedTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PerfDB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

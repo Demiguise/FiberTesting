@@ -13,8 +13,11 @@ public:
 	void stopTimer();
 	void resetTimer();
 
+	static UINT64 GetCountNow();
+	static float GetTimeBetween(UINT64 start, UINT64 end);
+
 private:
-	float secsPerCount;
+	static float secsPerCount;
 	UINT64 startCount;
 	UINT64 endCount;
 	bool running;
