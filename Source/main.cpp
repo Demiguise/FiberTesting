@@ -67,15 +67,6 @@ void Render(GLFWwindow* pWindow)
 		GLfloat* image = (GLfloat*)malloc(sizeof(GLfloat) * gWinHeight * gWinWidth * 4);
 		g_pRayTracer->GetGLPixelOutput(image);
 
-		GLfloat* pImage = image;
-		for (int i = 0 ; i < 5005 ; ++i)
-		{
-			*pImage++ = 255.f;
-			*pImage++ = 255.f;
-			*pImage++ = 255.f;
-			*pImage++ = 255.f;
-		}
-		
 		if (image)
 		{
 			glDrawPixels(gWinWidth, gWinHeight, GL_RGBA, GL_FLOAT, image);
@@ -85,7 +76,7 @@ void Render(GLFWwindow* pWindow)
 		glfwSwapBuffers(pWindow);
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	if (!glfwInit())
 	{

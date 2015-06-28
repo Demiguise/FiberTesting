@@ -72,7 +72,7 @@
     <ClCompile Include="Source\WebDebugger\WebDebugger.cpp">
       <Filter>Source Files\WebDebugger</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ThreadFiberTest.cpp">
+    <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

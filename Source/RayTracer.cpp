@@ -238,14 +238,6 @@ void CRayTracer::OutputImage()
 		}
 	}
 
-	for (int i = 0 ; i < 5005 ; ++i)
-	{
-		image[i + 0] = 255;
-		image[i + 1] = 255;
-		image[i + 2] = 255;
-		image[i + 3] = 255;
-	}
-
 	unsigned error = lodepng::encode("D:\\ThreadFiberTest\\Renders\\output.png", image, gWinWidth, gWinHeight);
 }
 
