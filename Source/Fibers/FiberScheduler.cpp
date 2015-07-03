@@ -57,6 +57,7 @@ CFiber* CFiberScheduler::AcquireNextFiber(CFiber* pOldFiber)
 
 	if (boundFiber->GetState() != CFiber::eFS_Bound)
 	{
+		DebugLog("Fiber (%d) failed to bind.", boundFiber->GetID());
 		return NULL;
 	}
 
@@ -97,6 +98,7 @@ void CFiberScheduler::AllocateJobs()
 						m_avgTimes.push_back(it->second.elapsedTime());
 						m_activeTimers.erase(it);
 					}
+
 					pFiber->SetNextFiber(newFiber);
 					Timer& newT = m_activeTimers[newFiber];
 					newT.startTimer();
@@ -116,6 +118,7 @@ void CFiberScheduler::AllocateJobs()
 	g_pFiberScheduler->m_jobQueue[prio].push(job);
 	enQueueLock.unlock();
 }
+
 
 void CFiberScheduler::FiberYield(CFiber* pFiber, CFiberCounter* pCounter)
 {

@@ -14,27 +14,13 @@ extern CRayTracer* g_pRayTracer = 0;
 CRayTracer::CRayTracer()
 {
 	//Define Spheres
-	SSphere sphereRed, sphereGreen, sphereBlue, spherePurp, sphereYellow;
-	
-	sphereRed.pos = EnVector3(100.f, 150.f, 0.f);
-	sphereRed.colour.x = 255.f;
-	sphereRed.r = 20.f;
-	sphereGreen.pos = EnVector3(350.f, 300.f, 0.f);
-	sphereGreen.colour.y = 255.f;
-	sphereGreen.r = 14.f;
-	sphereBlue.pos = EnVector3(350.f, 80.f, 0.f);
-	sphereBlue.colour.z = 255.f;
-	sphereBlue.r = 35.f;
+	SSphere sphereRed(EnVector3(100.f, 150.f, 100.f), EnVector4(255.f, 0.f, 0.f, 255.f), 20.f);
+	SSphere sphereGreen(EnVector3(350.f, 300.f, 100.f), EnVector4(0.f, 255.f, 0.f, 255.f), 14.f);
+	SSphere sphereBlue(EnVector3(350.f, 80.f, 100.f), EnVector4(0.f, 0.f, 255.f, 255.f), 35.f);
 
 	//Overlap Test
-	spherePurp.pos = EnVector3(230.f, 160.f, 20.f);
-	spherePurp.colour.x = 255.f;
-	spherePurp.colour.z = 255.f;
-	spherePurp.r = 20.f;
-	sphereYellow.pos = EnVector3(250.f, 160.f, -20.f);
-	sphereYellow.colour.x = 255.f;
-	sphereYellow.colour.y = 255.f;
-	sphereYellow.r = 20.f;
+	SSphere spherePurp(EnVector3(230.f, 160.f, 130.f), EnVector4(255.f, 255.f, 0.f, 255.f), 20.f);
+	SSphere sphereYellow(EnVector3(350.f, 80.f, 100.f), EnVector4(255.f, 0.f, 255.f, 255.f), 20.f);
 
 	m_scene.geom.push_back(sphereRed);
 	m_scene.geom.push_back(sphereGreen);
@@ -44,16 +30,15 @@ CRayTracer::CRayTracer()
 
 	//Define Lights
 	SLight lightLeft, lightRight;
-	lightLeft.pos = EnVector3(100.f, 75.f, 0.f);
+	lightLeft.pos = EnVector3(100.f, 75.f, 100.f);
 	lightLeft.str = 100000.f;
 	lightLeft.id = 0;
-	lightRight.pos = EnVector3(400.f, 100.f, 0.f);
+	lightRight.pos = EnVector3(400.f, 100.f, 100.f);
 	lightRight.str = 100000.f;
 	lightRight.id = 1;
 
 	m_scene.lights.push_back(lightLeft);
 	m_scene.lights.push_back(lightRight);
-
 
 	for (int w = 0 ; w < gWinWidth ; ++w)
 	{
@@ -91,8 +76,32 @@ void CRayTracer::SeedChunk(LPVOID lpParam)
 	int chunkW = data.GetInt(2);
 	int offsetY = data.GetInt(3);
 	int offsetX = data.GetInt(4);
-	void* pScene = data.GetPointer(5);
+	TSceneGeom* pScene = (TSceneGeom*)data.GetPointer(5);
 	TPixelData* pPixels = (TPixelData*)data.GetPointer(6);
+
+	//Figure out which geometry is within the sight of this particular chunk.
+	//Basic AABB testing
+	//Could do better with pointers into the raytracer array instead. Less copying of data.
+	//Getting it to work now though.
+	TSceneGeom visibleGeom;
+	TSceneGeom::iterator it = pScene->begin();
+	TSceneGeom::iterator itEnd = pScene->end();
+	AABB chunkBox;
+	chunkBox.min = EnVector3(offsetX, offsetY, 0.f);
+	chunkBox.max = EnVector3(chunkW + offsetX, chunkH + offsetY, 150.f);
+	for (; it != itEnd ; ++it)
+	{
+		if (chunkBox.Overlaps(it->aabb))
+		{
+			visibleGeom.push_back(*it);
+		}
+	}
+
+	if (visibleGeom.empty())
+	{
+		CFiber::Log("Chunk %d contains no visible geometry, skipping", id);
+		return;
+	}
 
 	CREATEJOB(rayJob, CalculatePixelColour);
 	UINT32 numJobs = 0;
@@ -106,12 +115,13 @@ void CRayTracer::SeedChunk(LPVOID lpParam)
 			SPixelData* pPixelData = &(*(pPixels + pPos.x))[pPos.y];
 			pPixelData->pos = pPos;
 			pixelJob.AddData(pPixelData);
-			pixelJob.AddData(pScene);
+			pixelJob.AddData(&visibleGeom);
 			CFiberScheduler::Schedule(rayJob, eFP_Normal, pixelJob, &pixelCounter);
 			++numJobs;
 		}
 	}
-	CFiber::Log("%u Jobs seeded for Chunk %d. (pX:%d | pY:%d)", numJobs, id, offsetX, offsetY);
+
+	CFiber::Log("%u Jobs seeded for Chunk %d. %d Geoms in chunk. (pX:%d | pY:%d)", numJobs, id, visibleGeom.size(), offsetX, offsetY);
 	CFiber::YieldForCounter(&pixelCounter);
 	CFiber::Log("Chunk %d finished.", id);
 }
@@ -125,7 +135,7 @@ void CRayTracer::SeedChunk(LPVOID lpParam)
 	SSceneInfo* pScene = (SSceneInfo*)data.GetPointer(1);
 
 	//Cast ray from "pixel" position out towards the positive Z axis
-	SRayCastInfo info = FindClosestPoint(EnVector3(pixelData->pos.x, pixelData->pos.y, -1000.f), EnVector3(0.f, 0.f, 1.f), &pScene->geom);
+	SRayCastInfo info = FindClosestPoint(EnVector3(pixelData->pos.x, pixelData->pos.y, 0.f), EnVector3(0.f, 0.f, 1.f), &pScene->geom);
 
 	if (info.pHitGeom)
 	{

@@ -75,6 +75,9 @@
     <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Common\Math.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\lodepng.h">
@@ -124,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="Source\WebDebugger\WebDebugger.h">
       <Filter>Source Files\WebDebugger</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\Math.h">
+      <Filter>Source Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

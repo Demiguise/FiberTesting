@@ -19,10 +19,32 @@ struct PixelCoord
 	int y;
 };
 
+struct AABB
+{
+	EnVector3	min;
+	EnVector3 max;
+	bool Overlaps(AABB& rhs)
+	{
+		if (max.x < rhs.min.x || min.x > rhs.max.x) return false;
+		if (max.y < rhs.min.y || min.y > rhs.max.y) return false;
+		if (max.z < rhs.min.z || min.z > rhs.max.z) return false;
+		return true;
+	}
+};
+
 struct SSphere
 {
+	SSphere(EnVector3 _pos, EnVector4 _colour, float _r)
+		: pos(_pos)
+		, colour(_colour)
+		, r(_r)
+	{
+		aabb.max = EnVector3(pos.x + r, pos.y + r, pos.z + r);
+		aabb.min = EnVector3(pos.x - r, pos.y - r, pos.z - r);
+	}
 	EnVector3 pos;
 	EnVector4 colour;
+	AABB aabb;
 	float r;
 };
 

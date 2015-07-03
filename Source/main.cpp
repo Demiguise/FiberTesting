@@ -100,8 +100,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	g_pRayTracer = new CRayTracer();
 	g_pPerfDB = new PerformanceDB();
 
-	Timer scheduleTimer, jobCheckTimer;
-	scheduleTimer.startTimer();
+	Timer jobCheckTimer;
 	jobCheckTimer.startTimer();
 
 	// Todo:
@@ -121,6 +120,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 				bTracingStarted = false;
 			}
 
+#if PERF_LOGS_ON
 			if (jobCheckTimer.elapsedTime() > 1.f)
 			{
 				g_pFiberScheduler->PrintAverageJobTime();
@@ -128,6 +128,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 				
 				g_pPerfDB->ReportAvgs();
 			}
+#endif //~_PERF_LOGS_ON
 		}
 		Render(window);
 		glfwPollEvents();

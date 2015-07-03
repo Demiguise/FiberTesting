@@ -15,7 +15,8 @@
 #include <Windows.h>
 #include <stdint.h>
 
-#define FIBER_OUTPUT_ON 0
+#define FIBER_OUTPUT_ON 1
+#define PERF_LOGS_ON 1
 
 
 namespace 

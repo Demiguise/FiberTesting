@@ -77,7 +77,6 @@ void CFiber::SetState(EFiberState newState)
 	CFiber* pFiber = (CFiber*)GetFiberData();
 	pFiber->SetState(eFS_Active);
 	pFiber->ReleasePrevious();
-
 #if FIBER_ENABLE_DEBUG
 	pFiber->SetThreadName(pFiber->m_job.m_jobName.c_str());
 #endif
@@ -88,7 +87,6 @@ void CFiber::SetState(EFiberState newState)
 
 void CFiber::ReleasePrevious()
 {
-	PERFTIMER_FUNC();
 	m_pNextFiber = NULL;
 
 	if (m_pPrevFiber)
@@ -106,11 +104,11 @@ void CFiber::ReleasePrevious()
 	}
 }
 
+#pragma optimize("", off)
 /*Static*/ void CFiber::YieldForCounter(CFiberCounter* counter)
 {
 	CFiber* pFiber = (CFiber*)GetFiberData();
 	g_pFiberScheduler->FiberYield(pFiber, counter);
-
 	assert(!pFiber->m_pNextFiber);
 
 	while (!pFiber->m_pNextFiber)
@@ -142,25 +140,25 @@ void CFiber::SetNextFiber(CFiber* nextFiber)
 void CFiber::EndJob()
 {
 	PERFTIMER_FUNC();
-	if (CFiberCounter* pCounter = m_job.m_pCounter)
+	if (m_job.m_pCounter)
 	{
-		pCounter->DecrementCounter();
+		m_job.m_pCounter->DecrementCounter();
 	}
 
 	assert(!m_pNextFiber);
 
 	SetState(eFS_WaitingForJob);
 
-	while (!m_pNextFiber)
 	{
+		PERFTIMER("Time Until Next");
+		while (!m_pNextFiber)
+		{
+		}
 	}
-
 	SetState(eFS_Finished);
 
 	SwitchToFiber(m_pNextFiber->Address());
 }
-
-
 
 /*Static*/ void CFiber::Log(std::string frmt, ...)
 {
