@@ -14,9 +14,10 @@ CSpinlock::~CSpinlock()
 
 void CSpinlock::Lock()
 {
-	bool state = m_lock.load();
-	while(m_lock.compare_exchange_weak(state, true))
+	bool state = false;
+	while(!m_lock.compare_exchange_weak(state, true))
 	{
+		state = false;
 	}
 }
 

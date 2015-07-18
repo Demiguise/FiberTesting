@@ -32,6 +32,7 @@ public:
 		if (m_lock)
 		{
 			m_lock->Unlock();
+			m_lock = NULL;
 		}
 	}
 

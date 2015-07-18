@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "FiberScheduler.h"
 #include "CoreThread.h"
+#include "Common/Spinlock.h"
 
 extern CFiberScheduler* g_pFiberScheduler = 0;
 
-std::mutex enQueueLock;
+CSpinlock enQueueLock;
 
 CFiberScheduler::CFiberScheduler()
 {
@@ -35,7 +36,7 @@ CFiber* CFiberScheduler::AcquireNextFiber(CFiber* pOldFiber)
 	for (int i = 0 ; i < k_maxFiberPool ; ++i)
 	{
 		CFiber& fiber = m_fiberPool[i];
-		if (fiber.GetState() == CFiber::eFS_InActive)
+		if (fiber.AtomicStateSwitch(CFiber::eFS_InActive, CFiber::eFS_WaitingForJob))
 		{
 			boundFiber = &fiber;
 			break;
@@ -44,18 +45,17 @@ CFiber* CFiberScheduler::AcquireNextFiber(CFiber* pOldFiber)
 
 	for (int i = 0 ; i < eFP_Num ; ++i)
 	{
+		CScopedLock lock(&enQueueLock);
 		if (!m_jobQueue[i].empty())
 		{
-			enQueueLock.lock();
 			SJobRequest job = m_jobQueue[i].front();
 			boundFiber->Bind(job);
 			m_jobQueue[i].pop();
-			enQueueLock.unlock();
 			break;
 		}
 	}
 
-	if (boundFiber->GetState() != CFiber::eFS_Bound)
+	if (!boundFiber->InState(CFiber::eFS_Bound))
 	{
 		DebugLog("Fiber (%d) failed to bind.", boundFiber->GetID());
 		return NULL;
@@ -72,7 +72,7 @@ void CFiberScheduler::StartJobs()
 	{
 		SThreadInfo& info = m_activeFibers[i].first;
 		CFiber* pInitialFiber = AcquireNextFiber(NULL);
-		pInitialFiber->SetState(CFiber::eFS_Bound);
+		pInitialFiber->AtomicStateSwitch(CFiber::eFS_InActive, CFiber::eFS_Bound);
 		m_activeFibers[i].second = pInitialFiber;
 		info.m_pStartingFiber = pInitialFiber;
 		CCoreThread thread(&info);
@@ -85,11 +85,8 @@ void CFiberScheduler::AllocateJobs()
 	{
 		if (CFiber* pFiber = m_activeFibers[i].second)
 		{
-			CFiber::EFiberState state = pFiber->GetState();
-			switch (state)
+			if (pFiber->InState(CFiber::eFS_Yielded) || pFiber->InState(CFiber::eFS_WaitingForJob))
 			{
-			case CFiber::eFS_Yielded:
-			case CFiber::eFS_WaitingForJob:
 				if (CFiber* newFiber = AcquireNextFiber(pFiber))
 				{
 					TTimerMap::iterator it = m_activeTimers.find(pFiber);
@@ -114,9 +111,8 @@ void CFiberScheduler::AllocateJobs()
 {
 	job.m_jobData = data;
 	job.m_pCounter = pCounter;
-	enQueueLock.lock();
+	CScopedLock lock(&enQueueLock);
 	g_pFiberScheduler->m_jobQueue[prio].push(job);
-	enQueueLock.unlock();
 }
 
 
@@ -160,6 +156,6 @@ void CFiberScheduler::PrintAverageJobTime()
 	}
 
 	avg /= numJobs;
-	DebugLog("JPS: %d | ATPJ: %f | (%f...%f) | Total:%f", numJobs, avg, lowest, highest, (numJobs * avg) / k_maxRunningFibers);
+	DebugLog("JPS: %d | ATPJ: %f | (%f...%f) | Total:%f", (int)numJobs, avg, lowest, highest, (numJobs * avg) / k_maxRunningFibers);
 	m_avgTimes.clear();
 }

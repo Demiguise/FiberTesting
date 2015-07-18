@@ -250,18 +250,3 @@ void CRayTracer::OutputImage()
 
 	unsigned error = lodepng::encode("D:\\ThreadFiberTest\\Renders\\output.png", image, gWinWidth, gWinHeight);
 }
-
-void CRayTracer::GetGLPixelOutput(GLfloat* pOutput)
-{
-	for (int w = 0 ; w < gWinWidth ; ++w)
-	{
-		for (int h = 0 ; h < gWinHeight ; ++h)
-		{
-			EnVector4& colour = m_jobDatas[w][h].finalColour;
-			*pOutput++ = colour.x;
-			*pOutput++ = colour.y;
-			*pOutput++ = colour.z;
-			*pOutput++ = colour.w;
-		}
-	}
-}

@@ -5,8 +5,6 @@
 #include <vector>
 #include "Common/EnVectors.h"
 
-#include "glfw3.h"
-
 struct PixelCoord
 {
 	PixelCoord ()
@@ -94,7 +92,6 @@ public:
 	~CRayTracer();
 
 	void OutputImage();
-	void GetGLPixelOutput(GLfloat* pOutput);
 	SPixelData* GetPixelDataForPos(const int x, const int y) 
 	{ 
 		return &m_jobDatas[x][y]; 

@@ -33,6 +33,7 @@
     <ClCompile Include="Source\Fibers\MemoryManager.cpp" />
     <ClCompile Include="Source\lodepng.cpp" />
     <ClCompile Include="Source\RayTracer.cpp" />
+    <ClCompile Include="Source\Renderer\OGLRenderer.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\WebDebugger\WebDebugger.cpp" />
@@ -52,6 +53,7 @@
     <ClInclude Include="Source\Fibers\MemoryManager.h" />
     <ClInclude Include="Source\lodepng.h" />
     <ClInclude Include="Source\RayTracer.h" />
+    <ClInclude Include="Source\Renderer\OGLRenderer.h" />
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\targetver.h" />
     <ClInclude Include="Source\WebDebugger\WebDebugger.h" />
@@ -132,7 +134,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Libs\$(Configuration)\$(PlatformTarget)\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent />
@@ -192,7 +194,7 @@ del $(OutputPath)*.ilk</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)Libs\$(Configuration)\$(PlatformTarget)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo - Copying DLLs

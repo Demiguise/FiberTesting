@@ -8,6 +8,7 @@
 #include "Fiber.h"
 #include "CoreThread.h"
 #include "Common/Timer.h"
+#include "JobQueue.h"
 #include <mutex>
 
 #define FIBER_STACK_SIZE 0
@@ -40,8 +41,8 @@ public:
 	{
 		for (int i = 0 ; i < k_maxRunningFibers; ++i)
 		{
-			CFiber::EFiberState state = m_activeFibers[i].second->GetState();
-			if (state != CFiber::eFS_WaitingForJob)
+			CFiber* pActiveFiber = m_activeFibers[i].second;
+			if (!pActiveFiber->InState(CFiber::eFS_WaitingForJob))
 			{
 				return true;
 			}

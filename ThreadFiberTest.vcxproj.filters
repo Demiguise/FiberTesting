@@ -25,6 +25,9 @@
     <Filter Include="Source Files\WebDebugger">
       <UniqueIdentifier>{e8ff9ebf-be66-4011-9307-77041231d844}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Renderer">
+      <UniqueIdentifier>{65f86a5a-a372-447f-bf43-4e5326b6ed0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\lodepng.cpp">
@@ -78,6 +81,9 @@
     <ClCompile Include="Source\Common\Math.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Renderer\OGLRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\lodepng.h">
@@ -130,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="Source\Common\Math.h">
       <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Renderer\OGLRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

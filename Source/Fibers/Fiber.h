@@ -153,7 +153,8 @@ public:
 	void SetID(UINT16 id) { m_id = id; }
 	SJobRequest* GetJobInfo() { return &m_job; }
 
-	EFiberState inline GetState() const { return m_state; }
+	bool inline InState(EFiberState state) const;
+	bool AtomicStateSwitch(EFiberState oldState, EFiberState newState);
 	void inline SetState(EFiberState newState);
 
 	void SetPrevious(CFiber* pPrevFiber) { m_pPrevFiber = pPrevFiber; }
@@ -165,7 +166,7 @@ private:
 	SJobRequest m_job;
 	UINT16 m_id;
 	size_t m_stackSize;
-	EFiberState m_state;
+	std::atomic<EFiberState> m_state;
 	LPVOID m_pFiber;
 	CFiber* m_pPrevFiber;
 	CFiber* m_pNextFiber;

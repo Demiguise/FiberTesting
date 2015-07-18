@@ -5,7 +5,9 @@
 #include "Common/Timer.h"
 #include "RayTracer.h"
 #include "Debug/PerfDB.h"
+#include "Renderer/OGLRenderer.h"
 
+#include "glew.h"
 #include "glfw3.h"
 #include <math.h>
 
@@ -61,21 +63,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-void Render(GLFWwindow* pWindow)
-{
-		//Render
-		GLfloat* image = (GLfloat*)malloc(sizeof(GLfloat) * gWinHeight * gWinWidth * 4);
-		g_pRayTracer->GetGLPixelOutput(image);
-
-		if (image)
-		{
-			glDrawPixels(gWinWidth, gWinHeight, GL_RGBA, GL_FLOAT, image);
-			free(image);
-		}
-
-		glfwSwapBuffers(pWindow);
-}
-
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	if (!glfwInit())
@@ -94,8 +81,9 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
 
-	//DebugLog("%s", glGetString(GL_VERSION));
+	DebugLog("%s", glGetString(GL_VERSION));
 
+	COGLRenderer* pRenderer = new COGLRenderer();
 	g_pFiberScheduler = new CFiberScheduler();
 	g_pRayTracer = new CRayTracer();
 	g_pPerfDB = new PerformanceDB();
@@ -106,14 +94,13 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	// Todo:
 	// Add better Debugging. Perhaps a list of completed jobs / personal log etc?
 	// Needs some way of identifying jobs.
-	// Explore possiblity of openGL library that matt had for even better debugging (Can click on pixel, see job listing, etc) IMGUI?
 
 	while (!glfwWindowShouldClose(window))
 	{
 		//Allocate
 		if (bTracingStarted)
 		{
-			g_pFiberScheduler->AllocateJobs();
+			//g_pFiberScheduler->AllocateJobs();
 			if (!g_pFiberScheduler->IsActive())
 			{
 				DebugLog("Done?!");
@@ -130,7 +117,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 			}
 #endif //~_PERF_LOGS_ON
 		}
-		Render(window);
+		pRenderer->RenderScene(window);
 		glfwPollEvents();
 	}
 	

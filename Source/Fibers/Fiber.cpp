@@ -41,8 +41,10 @@ void CFiber::Init(UINT16 id, size_t stackSize)
 void CFiber::Bind(SJobRequest& job)
 {
 	assert(!m_pFiber);
+
+	m_pFiber = CreateFiber(m_stackSize, CFiber::Run, this);
 	
-	if (m_pFiber = CreateFiber(m_stackSize, CFiber::Run, this))
+	if (m_pFiber)
 	{
 		m_job = job;
 		SetState(eFS_Bound);
@@ -55,13 +57,24 @@ void CFiber::Bind(SJobRequest& job)
 
 void CFiber::Release()
 {
-	assert(GetState() == eFS_Finished);
+	assert(InState(eFS_Finished));
 	if (m_pFiber)
 	{
 		DeleteFiber(m_pFiber);
 		m_pFiber = NULL;
 		SetState(eFS_InActive);
 	}
+}
+
+bool CFiber::InState(EFiberState state) const
+{
+	EFiberState curState = m_state.load();
+	return curState == state;
+}
+
+bool CFiber::AtomicStateSwitch(EFiberState oldState, EFiberState newstate)
+{
+	return m_state.compare_exchange_weak(oldState, newstate);
 }
 
 void CFiber::SetState(EFiberState newState)
@@ -91,12 +104,12 @@ void CFiber::ReleasePrevious()
 
 	if (m_pPrevFiber)
 	{
-		if (m_pPrevFiber->GetState() == eFS_Finished)
+		if (m_pPrevFiber->InState(eFS_Finished))
 		{
 			m_pPrevFiber->Release();
 			m_pPrevFiber = NULL;
 		}
-		else if (m_pPrevFiber->GetState() != eFS_Yielded)
+		else if (!m_pPrevFiber->InState(eFS_Yielded))
 		{
 			Log("Last fiber hasn't finished yet?");
 			DebugBreak();
@@ -111,10 +124,7 @@ void CFiber::ReleasePrevious()
 	g_pFiberScheduler->FiberYield(pFiber, counter);
 	assert(!pFiber->m_pNextFiber);
 
-	while (!pFiber->m_pNextFiber)
-	{
-	}
-
+	pFiber->m_pNextFiber = g_pFiberScheduler->AcquireNextFiber(pFiber);
 	SwitchToFiber(pFiber->m_pNextFiber->Address());
 
 	pFiber->ReleasePrevious();
@@ -146,16 +156,14 @@ void CFiber::EndJob()
 	}
 
 	assert(!m_pNextFiber);
+	m_pNextFiber = g_pFiberScheduler->AcquireNextFiber(this);
 
-	SetState(eFS_WaitingForJob);
-
-	{
-		PERFTIMER("Time Until Next");
-		while (!m_pNextFiber)
-		{
-		}
-	}
 	SetState(eFS_Finished);
+
+	if (!m_pNextFiber)
+	{
+		return;
+	}
 
 	SwitchToFiber(m_pNextFiber->Address());
 }
