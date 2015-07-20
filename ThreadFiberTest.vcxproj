@@ -22,6 +22,7 @@
     <ClCompile Include="Source\Common\EnMatrix.cpp" />
     <ClCompile Include="Source\Common\EnVectors.cpp" />
     <ClCompile Include="Source\Common\Math.cpp" />
+    <ClCompile Include="Source\Common\Quaternion.cpp" />
     <ClCompile Include="Source\Common\Spinlock.cpp" />
     <ClCompile Include="Source\Common\Timer.cpp" />
     <ClCompile Include="Source\Debug\PerfDB.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="Source\Fibers\MemoryManager.cpp" />
     <ClCompile Include="Source\lodepng.cpp" />
     <ClCompile Include="Source\RayTracer.cpp" />
+    <ClCompile Include="Source\Renderer\Camera.cpp" />
     <ClCompile Include="Source\Renderer\OGLRenderer.cpp" />
     <ClCompile Include="Source\stdafx.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -42,6 +44,7 @@
     <ClInclude Include="Source\Common\EnMatrix.h" />
     <ClInclude Include="Source\Common\EnVectors.h" />
     <ClInclude Include="Source\Common\Math.h" />
+    <ClInclude Include="Source\Common\Quaternion.h" />
     <ClInclude Include="Source\Common\Spinlock.h" />
     <ClInclude Include="Source\Common\Timer.h" />
     <ClInclude Include="Source\Debug\PerfDB.h" />
@@ -53,10 +56,15 @@
     <ClInclude Include="Source\Fibers\MemoryManager.h" />
     <ClInclude Include="Source\lodepng.h" />
     <ClInclude Include="Source\RayTracer.h" />
+    <ClInclude Include="Source\Renderer\Camera.h" />
     <ClInclude Include="Source\Renderer\OGLRenderer.h" />
     <ClInclude Include="Source\stdafx.h" />
     <ClInclude Include="Source\targetver.h" />
     <ClInclude Include="Source\WebDebugger\WebDebugger.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Shaders\fragment.shader" />
+    <None Include="Source\Shaders\vertex.shader" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0D1C7123-E407-4EE2-BD38-EEB6B78898BA}</ProjectGuid>
@@ -139,7 +147,9 @@
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
-      <Command>echo - Copying DLLs
+      <Command>echo - Copying Shaders
+copy $(SolutionDir)Source\Shaders\*.shader $(OutputPath)Shaders\ /Y
+echo - Copying DLLs
 copy $(SolutionDir)DLLs\*.dll $(OutputPath) /Y
 echo - Copying Assets
 xcopy $(SolutionDir)Assets $(OutputPath)Assets /i /y /s /f

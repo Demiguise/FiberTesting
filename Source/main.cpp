@@ -79,11 +79,11 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	}
 
 	glfwMakeContextCurrent(window);
+	COGLRenderer* pRenderer = new COGLRenderer();
 	glfwSetKeyCallback(window, key_callback);
 
 	DebugLog("%s", glGetString(GL_VERSION));
 
-	COGLRenderer* pRenderer = new COGLRenderer();
 	g_pFiberScheduler = new CFiberScheduler();
 	g_pRayTracer = new CRayTracer();
 	g_pPerfDB = new PerformanceDB();
@@ -118,6 +118,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 #endif //~_PERF_LOGS_ON
 		}
 		pRenderer->RenderScene(window);
+		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	

@@ -23,6 +23,9 @@ namespace
 {
 #define SAFEFIBERRELEASE if(x) { x->Release(); x = NULL; }
 #define BIT(x) 1 << x
+#define PI 3.14159265f
+#define DEG2RAD(d) ((d * PI) / 180.0f)
+#define RAD2DEG(R) ((r * 180.0f) / PI
 
 	const static int gWinHeight = 320;
 	const static int gWinWidth = 480;

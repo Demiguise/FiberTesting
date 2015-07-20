@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Renderer">
       <UniqueIdentifier>{65f86a5a-a372-447f-bf43-4e5326b6ed0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Renderer\Shaders">
+      <UniqueIdentifier>{525fcf57-face-43d4-b005-89b1a0799a89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\lodepng.cpp">
@@ -83,6 +86,12 @@
     </ClCompile>
     <ClCompile Include="Source\Renderer\OGLRenderer.cpp">
       <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Renderer\Camera.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\Quaternion.cpp">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,5 +149,19 @@
     <ClInclude Include="Source\Renderer\OGLRenderer.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Renderer\Camera.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\Quaternion.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Shaders\vertex.shader">
+      <Filter>Source Files\Renderer\Shaders</Filter>
+    </None>
+    <None Include="Source\Shaders\fragment.shader">
+      <Filter>Source Files\Renderer\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
